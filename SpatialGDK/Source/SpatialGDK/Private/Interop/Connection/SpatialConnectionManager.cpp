@@ -19,7 +19,7 @@ using namespace SpatialGDK;
 
 struct ConfigureConnection
 {
-	ConfigureConnection(const FConnectionConfig& InConfig, const bool bConnectAsClient)
+	ConfigureConnection(const FConnectionConfig& InConfig, const bool bConnectAsClient, Worker_LogCallback* LogCallback)
 		: Config(InConfig)
 		, Params()
 		, WorkerType(*Config.WorkerType)
@@ -29,8 +29,25 @@ struct ConfigureConnection
 
 		Params.worker_type = WorkerType.Get();
 
-		Params.enable_protocol_logging_at_startup = Config.EnableProtocolLoggingAtStartup;
-		Params.protocol_logging.log_prefix = ProtocolLogPrefix.Get();
+		Worker_LogsinkParameters GdkLogging{};
+		GdkLogging.logsink_type = WORKER_LOGSINK_TYPE_CALLBACK;
+		GdkLogging.log_callback_parameters.log_callback = LogCallback;
+		Logsinks.Add(GdkLogging);
+
+		if (Config.EnableProtocolLoggingAtStartup)
+		{
+			Worker_LogsinkParameters ProtocolLogsinkParams{};
+			ProtocolLogsinkParams.logsink_type = WORKER_LOGSINK_TYPE_ROTATING_FILE;
+			ProtocolLogsinkParams.filter_parameters.categories = WORKER_LOG_CATEGORY_ALL;
+			ProtocolLogsinkParams.filter_parameters.level = WORKER_LOG_LEVEL_DEBUG;
+			ProtocolLogsinkParams.rotating_logfile_parameters.max_log_file_size_bytes = 123456789;
+			ProtocolLogsinkParams.rotating_logfile_parameters.log_prefix = ProtocolLogPrefix.Get();
+			Logsinks.Add(ProtocolLogsinkParams);
+		}
+
+		Params.enable_logging_at_startup = true;
+		Params.logsink_count = Logsinks.Num();
+		Params.logsinks = Logsinks.GetData();
 
 		Params.component_vtable_count = 0;
 		Params.default_component_vtable = &DefaultVtable;
@@ -96,6 +113,7 @@ struct ConfigureConnection
 	FTCHARToUTF8 WorkerType;
 	FTCHARToUTF8 ProtocolLogPrefix;
 	Worker_ComponentVtable DefaultVtable{};
+	TArray<Worker_LogsinkParameters> Logsinks;
 	Worker_CompressionParameters EnableCompressionParams{};
 
 #if WITH_EDITOR
@@ -229,6 +247,11 @@ void USpatialConnectionManager::ProcessLoginTokensResponse(const Worker_Alpha_Lo
 	ConnectToLocator(&DevAuthConfig);
 }
 
+void USpatialConnectionManager::OnLogCallback(void* UserData, const Worker_LogData* Message)
+{
+	UE_LOG(LogSpatialConnectionManager, Log, TEXT("SpatialOS Worker Log: %s"), UTF8_TO_TCHAR(Message->content));
+}
+
 void USpatialConnectionManager::RequestDeploymentLoginTokens()
 {
 	Worker_Alpha_LoginTokensRequest LTParams{};
@@ -287,7 +310,7 @@ void USpatialConnectionManager::ConnectToReceptionist(uint32 PlayInEditorID)
 
 	ReceptionistConfig.PreConnectInit(bConnectAsClient);
 
-	ConfigureConnection ConnectionConfig(ReceptionistConfig, bConnectAsClient);
+	ConfigureConnection ConnectionConfig(ReceptionistConfig, bConnectAsClient, &USpatialConnectionManager::OnLogCallback);
 
 	Worker_ConnectionFuture* ConnectionFuture = Worker_ConnectAsync(
 		TCHAR_TO_UTF8(*ReceptionistConfig.GetReceptionistHost()), ReceptionistConfig.ReceptionistPort,
@@ -306,7 +329,7 @@ void USpatialConnectionManager::ConnectToLocator(FLocatorConfig* InLocatorConfig
 
 	InLocatorConfig->PreConnectInit(bConnectAsClient);
 
-	ConfigureConnection ConnectionConfig(*InLocatorConfig, bConnectAsClient);
+	ConfigureConnection ConnectionConfig(*InLocatorConfig, bConnectAsClient, &USpatialConnectionManager::OnLogCallback);
 
 	FTCHARToUTF8 PlayerIdentityTokenCStr(*InLocatorConfig->PlayerIdentityToken);
 	FTCHARToUTF8 LoginTokenCStr(*InLocatorConfig->LoginToken);

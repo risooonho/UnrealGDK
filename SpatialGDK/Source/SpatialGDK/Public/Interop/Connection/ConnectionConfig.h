@@ -15,7 +15,7 @@ struct FConnectionConfig
 {
 	FConnectionConfig()
 		: UseExternalIp(false)
-		, EnableProtocolLoggingAtStartup(false)
+		, EnableProtocolLoggingAtStartup(true)
 		, LinkProtocol(WORKER_NETWORK_CONNECTION_TYPE_MODULAR_KCP)
 		, TcpMultiplexLevel(2) // This is a "finger-in-the-air" number.
 		// These settings will be overridden by Spatial GDK settings before connection applied (see PreConnectInit)
@@ -27,7 +27,7 @@ struct FConnectionConfig
 
 		FParse::Value(CommandLine, TEXT("workerId"), WorkerId);
 		FParse::Bool(CommandLine, TEXT("useExternalIpForBridge"), UseExternalIp);
-		FParse::Bool(CommandLine, TEXT("enableProtocolLogging"), EnableProtocolLoggingAtStartup);
+		FParse::Bool(CommandLine, TEXT("enableLogsinks"), EnableProtocolLoggingAtStartup);
 		FParse::Value(CommandLine, TEXT("protocolLoggingPrefix"), ProtocolLoggingPrefix);
         
 		FString LinkProtocolString;
