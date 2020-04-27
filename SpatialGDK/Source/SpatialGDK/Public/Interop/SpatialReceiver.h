@@ -29,7 +29,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogSpatialReceiver, Log, All);
 class USpatialNetConnection;
 class USpatialSender;
 class UGlobalStateManager;
-class SpatialLoadBalanceEnforcer;
 
 struct PendingAddComponentWrapper
 {
@@ -124,7 +123,7 @@ private:
 
 	void ApplyComponentDataOnActorCreation(Worker_EntityId EntityId, const Worker_ComponentData& Data, USpatialActorChannel& Channel, const FClassInfo& ActorClassInfo, TArray<ObjectPtrRefPair>& OutObjectsToResolve);
 	void ApplyComponentData(USpatialActorChannel& Channel, UObject& TargetObject, const Worker_ComponentData& Data);
-	
+
 	// This is called for AddComponentOps not in a critical section, which means they are not a part of the initial entity creation.
 	void HandleIndividualAddComponent(const Worker_AddComponentOp& Op);
 	void AttachDynamicSubobject(AActor* Actor, Worker_EntityId EntityId, const FClassInfo& Info);
@@ -216,8 +215,6 @@ private:
 
 	UPROPERTY()
 	UGlobalStateManager* GlobalStateManager;
-
-	SpatialLoadBalanceEnforcer* LoadBalanceEnforcer;
 
 	FTimerManager* TimerManager;
 

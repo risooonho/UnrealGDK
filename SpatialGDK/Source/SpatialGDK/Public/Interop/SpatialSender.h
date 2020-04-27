@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "EngineClasses/SpatialLoadBalanceEnforcer.h"
 #include "EngineClasses/SpatialNetBitWriter.h"
 #include "Interop/SpatialClassInfoManager.h"
 #include "Interop/SpatialRPCService.h"
@@ -75,8 +74,7 @@ public:
 	void SendComponentInterestForActor(USpatialActorChannel* Channel, Worker_EntityId EntityId, bool bNetOwned);
 	void SendComponentInterestForSubobject(const FClassInfo& Info, Worker_EntityId EntityId, bool bNetOwned);
 	void SendPositionUpdate(Worker_EntityId EntityId, const FVector& Location);
-	void SendAuthorityIntentUpdate(const AActor& Actor, VirtualWorkerId NewAuthoritativeVirtualWorkerId);
-	void SetAclWriteAuthority(const SpatialLoadBalanceEnforcer::AclWriteAuthorityRequest& Request);
+	void SendAuthorityDelegationUpdate(Worker_EntityId EntityId, VirtualWorkerId VirtualWorker) const;
 	FRPCErrorInfo SendRPC(const FPendingRPCParams& Params);
 	ERPCResult SendRPCInternal(UObject* TargetObject, UFunction* Function, const SpatialGDK::RPCPayload& Payload);
 	void SendCommandResponse(Worker_RequestId RequestId, Worker_CommandResponse& Response);
@@ -119,12 +117,14 @@ public:
 	void GainAuthorityThenAddComponent(USpatialActorChannel* Channel, UObject* Object, const FClassInfo* Info);
 
 	// Creates an entity authoritative on this server worker, ensuring it will be able to receive updates for the GSM.
-	void CreateServerWorkerEntity(int AttemptCounter = 1);
+	void CreateServerWorkerEntity(Worker_EntityId EntityId, int AttemptCounter = 1);
 	void UpdateServerWorkerEntityInterestAndPosition();
 
 	void ClearPendingRPCs(const Worker_EntityId EntityId);
 
 	bool ValidateOrExit_IsSupportedClass(const FString& PathName);
+
+	void SendClaimPartitionRequest(Worker_EntityId SystemWorkerEntityId, Worker_PartitionId PartitionId) const;
 
 private:
 	// Create a copy of an array of components. Deep copies all Schema_ComponentData.
@@ -155,7 +155,7 @@ private:
 	void TrackRPC(AActor* Actor, UFunction* Function, const SpatialGDK::RPCPayload& Payload, const ERPCType RPCType);
 #endif
 
-	bool WillHaveAuthorityOverActor(AActor* TargetActor, Worker_EntityId TargetEntity);
+	bool WillHaveAuthorityOverActor(AActor* TargetActor, Worker_EntityId TargetEntity) const;
 
 private:
 	UPROPERTY()

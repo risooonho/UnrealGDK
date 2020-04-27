@@ -42,7 +42,7 @@ void GetSubobjects(UObject* ParentObject, TArray<UObject*>& InSubobjects)
 		{
 			// Walk up the outer chain and ensure that no object is PendingKill. This is required because although
 			// EInternalObjectFlags::PendingKill prevents objects that are PendingKill themselves from getting added
-			// to the list, it'll still add children of PendingKill objects. This then causes an assertion within 
+			// to the list, it'll still add children of PendingKill objects. This then causes an assertion within
 			// FNetGUIDCache::RegisterNetGUID_Server where it again iterates up the object's owner chain, assigning
 			// ids and ensuring that no object is set to PendingKill in the process.
 			UObject* Outer = Object->GetOuter();
@@ -75,7 +75,7 @@ Worker_EntityId USpatialPackageMapClient::AllocateEntityIdAndResolveActor(AActor
 		return SpatialConstants::INVALID_ENTITY_ID;
 	}
 
-	Worker_EntityId EntityId = EntityPool->GetNextEntityId();
+	Worker_EntityId EntityId = AllocateNewEntityId();
 	if (EntityId == SpatialConstants::INVALID_ENTITY_ID)
 	{
 		UE_LOG(LogSpatialPackageMap, Error, TEXT("Unable to retrieve an Entity ID for Actor: %s"), *Actor->GetName());
@@ -343,6 +343,11 @@ const FClassInfo* USpatialPackageMapClient::TryResolveNewDynamicSubobjectAndGetC
 	UE_LOG(LogSpatialPackageMap, Error, TEXT("While trying to resolve a new dynamic subobject %s, the parent actor %s was not resolved."), *GetNameSafe(Object), *GetNameSafe(Actor));
 
 	return nullptr;
+}
+
+Worker_EntityId USpatialPackageMapClient::AllocateNewEntityId() const
+{
+	return EntityPool->GetNextEntityId();
 }
 
 FSpatialNetGUIDCache::FSpatialNetGUIDCache(USpatialNetDriver* InDriver)

@@ -15,8 +15,8 @@ void USpatialWorkerConnection::SetConnection(Worker_Connection* WorkerConnection
 
 	CacheWorkerAttributes();
 
-	const USpatialGDKSettings* SpatialGDKSettings = GetDefault<USpatialGDKSettings>();    
-	if (!SpatialGDKSettings->bRunSpatialWorkerConnectionOnGameThread)  
+	const USpatialGDKSettings* SpatialGDKSettings = GetDefault<USpatialGDKSettings>();
+	if (!SpatialGDKSettings->bRunSpatialWorkerConnectionOnGameThread)
 	{
 		if (OpsProcessingThread == nullptr)
 		{
@@ -153,6 +153,11 @@ PhysicalWorkerName USpatialWorkerConnection::GetWorkerId() const
 const TArray<FString>& USpatialWorkerConnection::GetWorkerAttributes() const
 {
 	return CachedWorkerAttributes;
+}
+
+Worker_EntityId USpatialWorkerConnection::GetWorkerEntityId() const
+{
+	return Worker_Connection_GetWorkerEntityId(WorkerConnection);
 }
 
 void USpatialWorkerConnection::CacheWorkerAttributes()

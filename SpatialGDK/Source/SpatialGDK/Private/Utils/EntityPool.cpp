@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 
 #include "Interop/SpatialReceiver.h"
+#include "Interop/SpatialSender.h"
 #include "SpatialGDKSettings.h"
 
 DEFINE_LOG_CATEGORY(LogSpatialEntityPool);
@@ -79,6 +80,12 @@ void UEntityPool::ReserveEntityIDs(int32 EntitiesToReserve)
 		{
 			bIsReady = true;
 		}
+
+		if (NetDriver->WorkerEntityId == SpatialConstants::INVALID_ENTITY_ID)
+		{
+            const Worker_EntityId ServerWorkerEntityId = NetDriver->PackageMap->AllocateNewEntityId();
+            NetDriver->Sender->CreateServerWorkerEntity(ServerWorkerEntityId);
+        }
 	});
 
 	// Reserve the Entity IDs

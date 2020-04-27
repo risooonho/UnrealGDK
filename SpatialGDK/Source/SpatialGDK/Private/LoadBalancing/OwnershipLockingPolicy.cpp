@@ -2,7 +2,6 @@
 
 #include "LoadBalancing/OwnershipLockingPolicy.h"
 
-#include "Schema/AuthorityIntent.h"
 #include "Schema/Component.h"
 #include "Utils/SpatialActorUtils.h"
 
@@ -45,7 +44,7 @@ ActorLockToken UOwnershipLockingPolicy::AcquireLock(AActor* Actor, FString Debug
 
 		AActor* OwnershipHierarchyRoot = SpatialGDK::GetHierarchyRoot(Actor);
 		AddOwnershipHierarchyRootInformation(OwnershipHierarchyRoot, Actor);
-		
+
 		ActorToLockingState.Add(Actor, MigrationLockElement{ 1, OwnershipHierarchyRoot });
 	}
 
