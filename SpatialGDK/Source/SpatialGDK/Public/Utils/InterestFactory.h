@@ -45,7 +45,8 @@ public:
 	Worker_ComponentData CreateInterestData(AActor* InActor, const FClassInfo& InInfo, const Worker_EntityId InEntityId) const;
 	Worker_ComponentUpdate CreateInterestUpdate(AActor* InActor, const FClassInfo& InInfo, const Worker_EntityId InEntityId) const;
 
-	Interest CreateServerWorkerInterest(const UAbstractLBStrategy* LBStrategy);
+	Interest CreateServerWorkerInterest();
+	Interest CreatePartitionInterest(const UAbstractLBStrategy* LBStrategy, VirtualWorkerId VirtualWorker) const;
 
 private:
 	// Shared constraints and result types are created at initialization and reused throughout the lifetime of the factory.
@@ -53,7 +54,7 @@ private:
 
 	// Build the checkout radius constraints for client workers
 	FrequencyConstraints CreateClientCheckoutRadiusConstraint(USpatialClassInfoManager* ClassInfoManager);
-	
+
 	// Builds the result types of necessary components for clients
 	// TODO: create and pull out into result types class
 	SchemaResultType CreateClientNonAuthInterestResultType(USpatialClassInfoManager* ClassInfoManager);

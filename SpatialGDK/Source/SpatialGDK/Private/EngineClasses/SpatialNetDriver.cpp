@@ -2389,8 +2389,7 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<Worker_OpLi
 	// To correctly initialize the ServerWorkerEntity on each server during op queueing, we need to catch several ops here.
 	// Note that this will break if any other CreateEntity requests are issued during the startup flow.
 	{
-		Worker_Op* CreateEntityResponseOp = nullptr;
-		FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_CREATE_ENTITY_RESPONSE, &CreateEntityResponseOp);
+		TArray<Worker_Op*> CreateEntityResponseOps = SpatialGDK::FindAllOpsOfType(InOpLists, WORKER_OP_TYPE_CREATE_ENTITY_RESPONSE);
 
 		Worker_Op* AddComponentOp = nullptr;
 		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::SERVER_WORKER_COMPONENT_ID, &AddComponentOp);
@@ -2398,9 +2397,9 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<Worker_OpLi
 		Worker_Op* AuthorityChangedOp = nullptr;
 		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::SERVER_WORKER_COMPONENT_ID, &AuthorityChangedOp);
 
-		if (CreateEntityResponseOp != nullptr)
+		if (CreateEntityResponseOps.Num() > 0)
 		{
-			FoundOps.Add(CreateEntityResponseOp);
+			FoundOps.Append(CreateEntityResponseOps);
 		}
 
 		if (AddComponentOp != nullptr)

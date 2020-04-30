@@ -213,7 +213,7 @@ GRIDBASEDLBSTRATEGY_TEST(GIVEN_four_cells_WHEN_get_worker_interest_for_virtual_w
 	// Take the top right corner, as then all our testing numbers can be positive.
 	Strat->SetLocalVirtualWorkerId(4);
 
-	SpatialGDK::QueryConstraint StratConstraint = Strat->GetWorkerInterestQueryConstraint();
+	SpatialGDK::QueryConstraint StratConstraint = Strat->GetWorkerInterestQueryConstraint(4);
 
 	SpatialGDK::BoxConstraint Box = StratConstraint.BoxConstraint.GetValue();
 

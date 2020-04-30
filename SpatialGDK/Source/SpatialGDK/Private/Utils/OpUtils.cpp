@@ -5,6 +5,25 @@
 
 namespace SpatialGDK
 {
+
+TArray<Worker_Op*> FindAllOpsOfType(const TArray<Worker_OpList*>& InOpLists, const Worker_OpType InOpType)
+{
+	TArray<Worker_Op*> Ops;
+	for (const Worker_OpList* OpList : InOpLists)
+	{
+		for (size_t i = 0; i < OpList->op_count; ++i)
+		{
+			Worker_Op* Op = &OpList->ops[i];
+
+			if (Op->op_type == InOpType)
+			{
+				Ops.Add(Op);
+			}
+		}
+	}
+	return Ops;
+}
+
 void FindFirstOpOfType(const TArray<Worker_OpList*>& InOpLists, const Worker_OpType InOpType, Worker_Op** OutOp)
 {
 	for (const Worker_OpList* OpList : InOpLists)
