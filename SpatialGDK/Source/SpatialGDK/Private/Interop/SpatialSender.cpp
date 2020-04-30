@@ -289,9 +289,9 @@ void USpatialSender::CreateServerWorkerEntity(Worker_EntityId EntityId, int Atte
 					SpatialConstants::INITIAL_SNAPSHOT_PARTITION_ENTITY_ID);
 			}
 
-			// We claim each server worker entity as a partition so server worker interest gets applied.
-			// Sender->SendClaimPartitionRequest(WeakSender->NetDriver->Connection->GetWorkerEntityId(), Op.entity_id);
-			// Actually I think putting this query on the partition entity component is better.
+			// We claim each server worker entity as a partition so server worker interest which is necessary for getting
+			// interest in the VirtualWorkerTranslator component.
+			Sender->SendClaimPartitionRequest(WeakSender->NetDriver->Connection->GetWorkerEntityId(), Op.entity_id);
 
 			return;
 		}

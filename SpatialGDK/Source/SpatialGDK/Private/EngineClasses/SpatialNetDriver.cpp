@@ -1860,7 +1860,7 @@ bool USpatialNetDriver::CreateSpatialNetConnection(const FURL& InUrl, const FUni
 	const TCHAR* WorkerAttributeOption = InUrl.GetOption(TEXT("workerAttribute"), nullptr);
 	check(WorkerAttributeOption);
 	SpatialConnection->ConnectionOwningWorkerId = FString(WorkerAttributeOption).Mid(1); // Trim off the = at the beginning.
-	SpatialConnection->ConnectingClientSystemEntityId = ClientSystemEntityId;
+	SpatialConnection->ConnectionClientWorkerSystemEntityId = ClientSystemEntityId;
 
 	// Register workerId and its connection.
 	if (TOptional<FString> WorkerId = ExtractWorkerIDFromAttribute(SpatialConnection->ConnectionOwningWorkerId))
@@ -2387,8 +2387,8 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<Worker_OpLi
 	}
 
 	// To correctly initialize the ServerWorkerEntity on each server during op queueing, we need to catch several ops here.
-	// Note that this will break if any other CreateEntity requests are issued during the startup flow.
 	{
+		// We can have multiple partition entity creation ops received on the leader server worker during startup which we need to support.
 		TArray<Worker_Op*> CreateEntityResponseOps = SpatialGDK::FindAllOpsOfType(InOpLists, WORKER_OP_TYPE_CREATE_ENTITY_RESPONSE);
 
 		Worker_Op* AddComponentOp = nullptr;
