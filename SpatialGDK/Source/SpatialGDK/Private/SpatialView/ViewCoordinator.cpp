@@ -110,6 +110,16 @@ OpList ViewCoordinator::GetLegacyOpList() const
 	return GetOpListFromViewDelta(*Delta);
 }
 
+const FString& ViewCoordinator::GetWorkerId() const
+{
+	return ConnectionHandler->GetWorkerId();
+}
+
+const TArray<FString>& ViewCoordinator::GetWorkerAttributes() const
+{
+	return ConnectionHandler->GetWorkerAttributes();
+}
+
 const TArray<Worker_EntityId>& ViewCoordinator::GetEntitiesAdded() const
 {
 	return Delta->GetEntitiesAdded();

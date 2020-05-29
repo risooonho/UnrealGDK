@@ -82,7 +82,7 @@ USpatialGDKSettings::USpatialGDKSettings(const FObjectInitializer& ObjectInitial
 	, bUseSecureClientConnection(false)
 	, bUseSecureServerConnection(false)
 	, bEnableClientQueriesOnServer(false)
-	, bUseSpatialView(false)
+	, bUseSpatialView(true)
 {
 	DefaultReceptionistHost = SpatialConstants::LOCAL_HOST;
 }
@@ -104,8 +104,8 @@ void USpatialGDKSettings::PostInitProperties()
 	CheckCmdLineOverrideBool(CommandLine, TEXT("OverrideActorRelevantForConnection"), TEXT("Actor relevant for connection"), bUseIsActorRelevantForConnection);
 	CheckCmdLineOverrideBool(CommandLine, TEXT("OverrideBatchSpatialPositionUpdates"), TEXT("Batch spatial position updates"), bBatchSpatialPositionUpdates);
 	CheckCmdLineOverrideBool(CommandLine, TEXT("OverrideWorkerFlushAfterOutgoingNetworkOp"), TEXT("Flush worker ops after sending an outgoing network op."), bWorkerFlushAfterOutgoingNetworkOp);
-	
-	
+
+
 
 #if WITH_EDITOR
 	ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();

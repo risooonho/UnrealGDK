@@ -1584,17 +1584,13 @@ void USpatialNetDriver::TickDispatch(float DeltaTime)
 	if (Connection != nullptr)
 	{
 		const USpatialGDKSettings* SpatialGDKSettings = GetDefault<USpatialGDKSettings>();
-		if (SpatialGDKSettings->bRunSpatialWorkerConnectionOnGameThread)
-		{
-			Connection->QueueLatestOpList();
-		}
 
 		TArray<OpList> OpLists = Connection->GetOpList();
 
 		// Servers will queue ops at startup until we've extracted necessary information from the op stream
 		if (!bIsReadyToStart)
 		{
-			HandleStartupOpQueueing(OpLists);
+			HandleStartupOpQueueing(MoveTemp(OpLists));
 			return;
 		}
 
@@ -2322,16 +2318,13 @@ void USpatialNetDriver::DelayedSendDeleteEntityRequest(Worker_EntityId EntityId,
 	}, Delay, false);
 }
 
-void USpatialNetDriver::HandleStartupOpQueueing(const TArray<SpatialGDK::OpList>& InOpLists)
+void USpatialNetDriver::HandleStartupOpQueueing(TArray<SpatialGDK::OpList> InOpLists)
 {
 	if (InOpLists.Num() == 0)
 	{
 		return;
 	}
 
-	// TODO: Discuss
-	//TArray<SpatialGDK::OpList> QueuedStartupOpLists;
-	//QueuedStartupOpLists.Append(InOpLists);
 	if (IsServer())
 	{
 		bIsReadyToStart = FindAndDispatchStartupOpsServer(InOpLists);
@@ -2356,13 +2349,15 @@ void USpatialNetDriver::HandleStartupOpQueueing(const TArray<SpatialGDK::OpList>
 		bIsReadyToStart = FindAndDispatchStartupOpsClient(InOpLists);
 	}
 
+	QueuedStartupOpLists.Append(MoveTemp(InOpLists));
+
 	if (!bIsReadyToStart)
 	{
 		return;
 	}
 
 	//for (const OpList& Ops : QueuedStartupOpLists)
-	for (const OpList& Ops : InOpLists)
+	for (const OpList& Ops : QueuedStartupOpLists)
 	{
 		Dispatcher->ProcessOps(Ops);
 	}
@@ -2371,15 +2366,14 @@ void USpatialNetDriver::HandleStartupOpQueueing(const TArray<SpatialGDK::OpList>
 	// all Ops we asked it to skip
 	check(Dispatcher->GetNumOpsToSkip() == 0);
 
-	//QueuedStartupOpLists.Empty();
+	QueuedStartupOpLists.Empty();
 }
 
 bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<OpList>& InOpLists)
 {
 	TArray<Worker_Op*> FoundOps;
 
-	Worker_Op* EntityQueryResponseOp = nullptr;
-	FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_ENTITY_QUERY_RESPONSE, &EntityQueryResponseOp);
+	Worker_Op* EntityQueryResponseOp = FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_ENTITY_QUERY_RESPONSE);
 
 	if (EntityQueryResponseOp != nullptr)
 	{
@@ -2389,14 +2383,11 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<OpList>& In
 	// To correctly initialize the ServerWorkerEntity on each server during op queueing, we need to catch several ops here.
 	// Note that this will break if any other CreateEntity requests are issued during the startup flow.
 	{
-		Worker_Op* CreateEntityResponseOp = nullptr;
-		FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_CREATE_ENTITY_RESPONSE, &CreateEntityResponseOp);
+		Worker_Op* CreateEntityResponseOp = FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_CREATE_ENTITY_RESPONSE);
 
-		Worker_Op* AddComponentOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::SERVER_WORKER_COMPONENT_ID, &AddComponentOp);
+		Worker_Op* AddComponentOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::SERVER_WORKER_COMPONENT_ID);
 
-		Worker_Op* AuthorityChangedOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::SERVER_WORKER_COMPONENT_ID, &AuthorityChangedOp);
+		Worker_Op* AuthorityChangedOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::SERVER_WORKER_COMPONENT_ID);
 
 		if (CreateEntityResponseOp != nullptr)
 		{
@@ -2419,8 +2410,7 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<OpList>& In
 	// a new query will be sent, and we will process the new response here when it arrives.
 	if (!PackageMap->IsEntityPoolReady())
 	{
-		Worker_Op* EntityIdReservationResponseOp = nullptr;
-		FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_RESERVE_ENTITY_IDS_RESPONSE, &EntityIdReservationResponseOp);
+		Worker_Op* EntityIdReservationResponseOp = FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_RESERVE_ENTITY_IDS_RESPONSE);
 
 		if (EntityIdReservationResponseOp != nullptr)
 		{
@@ -2431,14 +2421,11 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<OpList>& In
 	// Search for StartupActorManager ops we need and process them
 	if (!GlobalStateManager->IsReady())
 	{
-		Worker_Op* AddComponentOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::STARTUP_ACTOR_MANAGER_COMPONENT_ID, &AddComponentOp);
+		Worker_Op* AddComponentOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::STARTUP_ACTOR_MANAGER_COMPONENT_ID);
 
-		Worker_Op* AuthorityChangedOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::STARTUP_ACTOR_MANAGER_COMPONENT_ID, &AuthorityChangedOp);
+		Worker_Op* AuthorityChangedOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::STARTUP_ACTOR_MANAGER_COMPONENT_ID);
 
-		Worker_Op* ComponentUpdateOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_COMPONENT_UPDATE, SpatialConstants::STARTUP_ACTOR_MANAGER_COMPONENT_ID, &ComponentUpdateOp);
+		Worker_Op* ComponentUpdateOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_COMPONENT_UPDATE, SpatialConstants::STARTUP_ACTOR_MANAGER_COMPONENT_ID);
 
 		if (AddComponentOp != nullptr)
 		{
@@ -2458,14 +2445,11 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<OpList>& In
 
 	if (VirtualWorkerTranslator.IsValid() && !VirtualWorkerTranslator->IsReady())
 	{
-		Worker_Op* AddComponentOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::VIRTUAL_WORKER_TRANSLATION_COMPONENT_ID, &AddComponentOp);
+		Worker_Op* AddComponentOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_ADD_COMPONENT, SpatialConstants::VIRTUAL_WORKER_TRANSLATION_COMPONENT_ID);
 
-		Worker_Op* AuthorityChangedOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::VIRTUAL_WORKER_TRANSLATION_COMPONENT_ID, &AuthorityChangedOp);
+		Worker_Op* AuthorityChangedOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_AUTHORITY_CHANGE, SpatialConstants::VIRTUAL_WORKER_TRANSLATION_COMPONENT_ID);
 
-		Worker_Op* ComponentUpdateOp = nullptr;
-		FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_COMPONENT_UPDATE, SpatialConstants::VIRTUAL_WORKER_TRANSLATION_COMPONENT_ID, &ComponentUpdateOp);
+		Worker_Op* ComponentUpdateOp = FindFirstOpOfTypeForComponent(InOpLists, WORKER_OP_TYPE_COMPONENT_UPDATE, SpatialConstants::VIRTUAL_WORKER_TRANSLATION_COMPONENT_ID);
 
 		if (AddComponentOp != nullptr)
 		{
@@ -2510,8 +2494,7 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsClient(const TArray<OpList>& In
 	else
 	{
 		// Search for the entity query response for the GlobalStateManager
-		Worker_Op* Op = nullptr;
-		FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_ENTITY_QUERY_RESPONSE, &Op);
+		Worker_Op* Op = FindFirstOpOfType(InOpLists, WORKER_OP_TYPE_ENTITY_QUERY_RESPONSE);
 
 		TArray<Worker_Op*> FoundOps;
 		if (Op != nullptr)

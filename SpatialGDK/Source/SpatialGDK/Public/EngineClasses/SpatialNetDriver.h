@@ -195,7 +195,7 @@ private:
 	TUniquePtr<SpatialGDK::SpatialRPCService> RPCService;
 
 	TMap<Worker_EntityId_Key, USpatialActorChannel*> EntityToActorChannel;
-	//TArray<SpatialGDK::OpList> QueuedStartupOpLists;
+	TArray<SpatialGDK::OpList> QueuedStartupOpLists;
 	TSet<Worker_EntityId_Key> DormantEntities;
 	TSet<TWeakObjectPtr<USpatialActorChannel>> PendingDormantChannels;
 
@@ -229,7 +229,7 @@ private:
 
 	void QueryGSMToLoadMap();
 
-	void HandleStartupOpQueueing(const TArray<SpatialGDK::OpList>& InOpLists);
+	void HandleStartupOpQueueing(TArray<SpatialGDK::OpList> InOpLists);
 	bool FindAndDispatchStartupOpsServer(const TArray<SpatialGDK::OpList>& InOpLists);
 	bool FindAndDispatchStartupOpsClient(const TArray<SpatialGDK::OpList>& InOpLists);
 	void SelectiveProcessOps(TArray<Worker_Op*> FoundOps);

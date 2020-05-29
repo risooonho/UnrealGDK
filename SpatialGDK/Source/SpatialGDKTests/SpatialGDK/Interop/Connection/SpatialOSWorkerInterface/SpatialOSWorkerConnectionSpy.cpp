@@ -40,15 +40,15 @@ void SpatialOSWorkerConnectionSpy::SendAddComponent(Worker_EntityId EntityId, FW
 void SpatialOSWorkerConnectionSpy::SendRemoveComponent(Worker_EntityId EntityId, Worker_ComponentId ComponentId)
 {}
 
-void SpatialOSWorkerConnectionSpy::SendComponentUpdate(Worker_EntityId EntityId, const FWorkerComponentUpdate* ComponentUpdate)
+void SpatialOSWorkerConnectionSpy::SendComponentUpdate(Worker_EntityId EntityId, FWorkerComponentUpdate* ComponentUpdate)
 {}
 
-Worker_RequestId SpatialOSWorkerConnectionSpy::SendCommandRequest(Worker_EntityId EntityId, const Worker_CommandRequest* Request, uint32_t CommandId)
+Worker_RequestId SpatialOSWorkerConnectionSpy::SendCommandRequest(Worker_EntityId EntityId, Worker_CommandRequest* Request, uint32_t CommandId)
 {
 	return NextRequestId++;
 }
 
-void SpatialOSWorkerConnectionSpy::SendCommandResponse(Worker_RequestId RequestId, const Worker_CommandResponse* Response)
+void SpatialOSWorkerConnectionSpy::SendCommandResponse(Worker_RequestId RequestId, Worker_CommandResponse* Response)
 {}
 
 void SpatialOSWorkerConnectionSpy::SendCommandFailure(Worker_RequestId RequestId, const FString& Message)

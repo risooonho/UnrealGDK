@@ -93,7 +93,7 @@ SpatialGDK::SpawnPlayerRequest USpatialPlayerSpawner::ObtainPlayerParams() const
 {
 	FURL LoginURL;
 	FUniqueNetIdRepl UniqueId;
-	
+
 	const FWorldContext* const WorldContext = GEngine->GetWorldContextFromWorld(NetDriver->GetWorld());
 	check(WorldContext->OwningGameInstance);
 
@@ -192,7 +192,7 @@ void USpatialPlayerSpawner::ReceivePlayerSpawnRequestOnServer(const Worker_Comma
 	Schema_Object* RequestPayload = Schema_GetCommandRequestObject(Op.request.schema_type);
 	FindPlayerStartAndProcessPlayerSpawn(RequestPayload, ClientWorkerId);
 
-	const Worker_CommandResponse Response = PlayerSpawner::CreatePlayerSpawnResponse();
+	Worker_CommandResponse Response = PlayerSpawner::CreatePlayerSpawnResponse();
 	NetDriver->Connection->SendCommandResponse(Op.request_id, &Response);
 }
 

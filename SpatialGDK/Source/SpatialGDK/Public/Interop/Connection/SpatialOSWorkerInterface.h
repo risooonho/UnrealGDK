@@ -22,9 +22,9 @@ public:
 	virtual Worker_RequestId SendDeleteEntityRequest(Worker_EntityId EntityId) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendDeleteEntityRequest, return 0;);
 	virtual void SendAddComponent(Worker_EntityId EntityId, FWorkerComponentData* ComponentData) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendAddComponent, return;);
 	virtual void SendRemoveComponent(Worker_EntityId EntityId, Worker_ComponentId ComponentId) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendRemoveComponent, return;);
-	virtual void SendComponentUpdate(Worker_EntityId EntityId, const FWorkerComponentUpdate* ComponentUpdate) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendComponentUpdate, return;);
-	virtual Worker_RequestId SendCommandRequest(Worker_EntityId EntityId, const Worker_CommandRequest* Request, uint32_t CommandId) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendCommandRequest, return 0;);
-	virtual void SendCommandResponse(Worker_RequestId RequestId, const Worker_CommandResponse* Response) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendCommandResponse, return;);
+	virtual void SendComponentUpdate(Worker_EntityId EntityId, FWorkerComponentUpdate* ComponentUpdate) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendComponentUpdate, return;);
+	virtual Worker_RequestId SendCommandRequest(Worker_EntityId EntityId, Worker_CommandRequest* Request, uint32_t CommandId) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendCommandRequest, return 0;);
+	virtual void SendCommandResponse(Worker_RequestId RequestId, Worker_CommandResponse* Response) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendCommandResponse, return;);
 	virtual void SendCommandFailure(Worker_RequestId RequestId, const FString& Message) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendCommandFailure, return;);
 	virtual void SendLogMessage(uint8_t Level, const FName& LoggerName, const TCHAR* Message) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendLogMessage, return;);
 	virtual void SendComponentInterest(Worker_EntityId EntityId, TArray<Worker_InterestOverride>&& ComponentInterest) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendEntityQueryRequest, return;);

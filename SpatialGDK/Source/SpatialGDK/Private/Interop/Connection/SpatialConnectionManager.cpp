@@ -11,8 +11,9 @@
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 
-#include "Interop/Connection/SpatialWorkerConnection.h"
 #include "SpatialGDKSettings.h"
+#include "Interop/Connection/SpatialWorkerConnection.h"
+#include "Interop/Connection/SpatialViewWorkerConnection.h"
 #include "Utils/ErrorCodeRemapping.h"
 
 DEFINE_LOG_CATEGORY(LogSpatialConnectionManager);
@@ -377,6 +378,15 @@ void USpatialConnectionManager::FinishConnecting(Worker_ConnectionFuture* Connec
 
 			if (Worker_Connection_IsConnected(NewCAPIWorkerConnection))
 			{
+				const USpatialGDKSettings* Settings = GetDefault<USpatialGDKSettings>();
+				if (Settings->bUseSpatialView)
+				{
+					SpatialConnectionManager->WorkerConnection = NewObject<USpatialViewWorkerConnection>();
+				}
+				else
+				{
+					SpatialConnectionManager->WorkerConnection = NewObject<USpatialWorkerConnection>();
+				}
 				SpatialConnectionManager->WorkerConnection = NewObject<USpatialWorkerConnection>();
 				SpatialConnectionManager->WorkerConnection->SetConnection(NewCAPIWorkerConnection);
 				SpatialConnectionManager->OnConnectionSuccess();

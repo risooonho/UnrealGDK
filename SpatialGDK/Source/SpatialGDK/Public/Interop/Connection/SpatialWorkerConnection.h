@@ -27,9 +27,9 @@ class SPATIALGDK_API USpatialWorkerConnection : public UObject, public FRunnable
 	GENERATED_BODY()
 
 public:
-	void SetConnection(Worker_Connection* WorkerConnectionIn);
+	virtual void SetConnection(Worker_Connection* WorkerConnectionIn);
 	virtual void FinishDestroy() override;
-	void DestroyConnection();
+	virtual void DestroyConnection();
 
 	// Worker Connection Interface
 	virtual TArray<SpatialGDK::OpList> GetOpList() override;
@@ -38,17 +38,17 @@ public:
 	virtual Worker_RequestId SendDeleteEntityRequest(Worker_EntityId EntityId) override;
 	virtual void SendAddComponent(Worker_EntityId EntityId, FWorkerComponentData* ComponentData) override;
 	virtual void SendRemoveComponent(Worker_EntityId EntityId, Worker_ComponentId ComponentId) override;
-	virtual void SendComponentUpdate(Worker_EntityId EntityId, const FWorkerComponentUpdate* ComponentUpdate) override;
-	virtual Worker_RequestId SendCommandRequest(Worker_EntityId EntityId, const Worker_CommandRequest* Request, uint32_t CommandId) override;
-	virtual void SendCommandResponse(Worker_RequestId RequestId, const Worker_CommandResponse* Response) override;
+	virtual void SendComponentUpdate(Worker_EntityId EntityId, FWorkerComponentUpdate* ComponentUpdate) override;
+	virtual Worker_RequestId SendCommandRequest(Worker_EntityId EntityId, Worker_CommandRequest* Request, uint32_t CommandId) override;
+	virtual void SendCommandResponse(Worker_RequestId RequestId, Worker_CommandResponse* Response) override;
 	virtual void SendCommandFailure(Worker_RequestId RequestId, const FString& Message) override;
 	virtual void SendLogMessage(uint8_t Level, const FName& LoggerName, const TCHAR* Message) override;
 	virtual void SendComponentInterest(Worker_EntityId EntityId, TArray<Worker_InterestOverride>&& ComponentInterest) override;
 	virtual Worker_RequestId SendEntityQueryRequest(const Worker_EntityQuery* EntityQuery) override;
 	virtual void SendMetrics(const SpatialGDK::SpatialMetrics& Metrics) override;
 
-	PhysicalWorkerName GetWorkerId() const;
-	const TArray<FString>& GetWorkerAttributes() const;
+	virtual PhysicalWorkerName GetWorkerId() const;
+	virtual const TArray<FString>& GetWorkerAttributes() const;
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnqueueMessage, const SpatialGDK::FOutgoingMessage*);
 	FOnEnqueueMessage OnEnqueueMessage;
@@ -56,12 +56,12 @@ public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnDequeueMessage, const SpatialGDK::FOutgoingMessage*);
 	FOnDequeueMessage OnDequeueMessage;
 
-	void QueueLatestOpList();
-	void ProcessOutgoingMessages();
-	void MaybeFlush();
-	void Flush();
+	virtual void ProcessOutgoingMessages();
+	virtual void MaybeFlush();
 
 private:
+	void QueueLatestOpList();
+	void Flush();
 	void CacheWorkerAttributes();
 
 	// Begin FRunnable Interface

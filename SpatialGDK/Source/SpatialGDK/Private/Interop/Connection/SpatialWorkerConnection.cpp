@@ -16,8 +16,8 @@ void USpatialWorkerConnection::SetConnection(Worker_Connection* WorkerConnection
 
 	CacheWorkerAttributes();
 
-	const USpatialGDKSettings* SpatialGDKSettings = GetDefault<USpatialGDKSettings>();    
-	if (!SpatialGDKSettings->bRunSpatialWorkerConnectionOnGameThread)  
+	const USpatialGDKSettings* SpatialGDKSettings = GetDefault<USpatialGDKSettings>();
+	if (!SpatialGDKSettings->bRunSpatialWorkerConnectionOnGameThread)
 	{
 		if (OpsProcessingThread == nullptr)
 		{
@@ -27,7 +27,7 @@ void USpatialWorkerConnection::SetConnection(Worker_Connection* WorkerConnection
 			if (WaitTimeMs <= 0)
 			{
 				UE_LOG(LogSpatialWorkerConnection, Warning, TEXT("Clamping wait time for worker ops thread to the minimum rate of 1ms."));
-				WaitTimeMs = 1; 
+				WaitTimeMs = 1;
 			}
 			ThreadWaitCondition.Emplace(bCanWake, WaitTimeMs);
 
@@ -72,6 +72,12 @@ void USpatialWorkerConnection::DestroyConnection()
 
 TArray<OpList> USpatialWorkerConnection::GetOpList()
 {
+	const USpatialGDKSettings* SpatialGDKSettings = GetDefault<USpatialGDKSettings>();
+	if (SpatialGDKSettings->bRunSpatialWorkerConnectionOnGameThread)
+	{
+		QueueLatestOpList();
+	}
+
 	TArray<OpList> OpLists;
 	while (!OpListQueue.IsEmpty())
 	{
@@ -111,18 +117,18 @@ void USpatialWorkerConnection::SendRemoveComponent(Worker_EntityId EntityId, Wor
 	QueueOutgoingMessage<FRemoveComponent>(EntityId, ComponentId);
 }
 
-void USpatialWorkerConnection::SendComponentUpdate(Worker_EntityId EntityId, const FWorkerComponentUpdate* ComponentUpdate)
+void USpatialWorkerConnection::SendComponentUpdate(Worker_EntityId EntityId, FWorkerComponentUpdate* ComponentUpdate)
 {
 	QueueOutgoingMessage<FComponentUpdate>(EntityId, *ComponentUpdate);
 }
 
-Worker_RequestId USpatialWorkerConnection::SendCommandRequest(Worker_EntityId EntityId, const Worker_CommandRequest* Request, uint32_t CommandId)
+Worker_RequestId USpatialWorkerConnection::SendCommandRequest(Worker_EntityId EntityId, Worker_CommandRequest* Request, uint32_t CommandId)
 {
 	QueueOutgoingMessage<FCommandRequest>(EntityId, *Request, CommandId);
 	return NextRequestId++;
 }
 
-void USpatialWorkerConnection::SendCommandResponse(Worker_RequestId RequestId, const Worker_CommandResponse* Response)
+void USpatialWorkerConnection::SendCommandResponse(Worker_RequestId RequestId, Worker_CommandResponse* Response)
 {
 	QueueOutgoingMessage<FCommandResponse>(RequestId, *Response);
 }
