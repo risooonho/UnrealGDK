@@ -4,6 +4,7 @@
 
 #include "Interop/Connection/OutgoingMessages.h"
 #include "SpatialCommonTypes.h"
+#include "SpatialView/OpList/OpList.h"
 #include "Utils/SpatialLatencyTracer.h"
 
 #include <WorkerSDK/improbable/c_schema.h>
@@ -15,7 +16,7 @@ public:
 // 	FORCEINLINE bool IsConnected() { return bIsConnected; }
 
 	// Worker Connection Interface
-	virtual TArray<Worker_OpList*> GetOpList() PURE_VIRTUAL(AbstractSpatialWorkerConnection::GetOpList, return TArray<Worker_OpList*>(););
+	virtual TArray<SpatialGDK::OpList> GetOpList() PURE_VIRTUAL(AbstractSpatialWorkerConnection::GetOpList, return TArray<SpatialGDK::OpList>(););
 	virtual Worker_RequestId SendReserveEntityIdsRequest(uint32_t NumOfEntities) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendReserveEntityIdsRequest, return 0;);
 	virtual Worker_RequestId SendCreateEntityRequest(TArray<FWorkerComponentData>&& Components, const Worker_EntityId* EntityId) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendCreateEntityRequest, return 0;);
 	virtual Worker_RequestId SendDeleteEntityRequest(Worker_EntityId EntityId) PURE_VIRTUAL(AbstractSpatialWorkerConnection::SendDeleteEntityRequest, return 0;);

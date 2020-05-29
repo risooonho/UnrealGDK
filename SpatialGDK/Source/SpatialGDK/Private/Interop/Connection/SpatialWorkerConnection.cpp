@@ -1,6 +1,7 @@
 // Copyright (c) Improbable Worlds Ltd, All Rights Reserved
 
 #include "Interop/Connection/SpatialWorkerConnection.h"
+#include "SpatialView/OpList/WorkerConnectionOpList.h"
 
 #include "Async/Async.h"
 #include "SpatialGDKSettings.h"
@@ -69,14 +70,14 @@ void USpatialWorkerConnection::DestroyConnection()
 	KeepRunning.AtomicSet(true);
 }
 
-TArray<Worker_OpList*> USpatialWorkerConnection::GetOpList()
+TArray<OpList> USpatialWorkerConnection::GetOpList()
 {
-	TArray<Worker_OpList*> OpLists;
+	TArray<OpList> OpLists;
 	while (!OpListQueue.IsEmpty())
 	{
-		Worker_OpList* OutOpList;
+		OpList OutOpList;
 		OpListQueue.Dequeue(OutOpList);
-		OpLists.Add(OutOpList);
+		OpLists.Add(MoveTemp(OutOpList));
 	}
 
 	return OpLists;
@@ -209,14 +210,11 @@ void USpatialWorkerConnection::InitializeOpsProcessingThread()
 
 void USpatialWorkerConnection::QueueLatestOpList()
 {
-	Worker_OpList* OpList = Worker_Connection_GetOpList(WorkerConnection, 0);
-	if (OpList->op_count > 0)
+	OpList Ops = GetOpListFromConnection(WorkerConnection);
+
+	if (Ops.Count > 0)
 	{
-		OpListQueue.Enqueue(OpList);
-	}
-	else
-	{
-		Worker_OpList_Destroy(OpList);
+		OpListQueue.Enqueue(MoveTemp(Ops));
 	}
 }
 

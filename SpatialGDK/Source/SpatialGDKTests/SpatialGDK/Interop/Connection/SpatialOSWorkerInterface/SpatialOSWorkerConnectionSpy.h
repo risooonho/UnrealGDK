@@ -22,7 +22,7 @@ class SpatialOSWorkerConnectionSpy : public SpatialOSWorkerInterface
 public:
 	SpatialOSWorkerConnectionSpy();
 
-	virtual TArray<Worker_OpList*> GetOpList() override;
+	virtual TArray<SpatialGDK::OpList> GetOpList() override;
 	virtual Worker_RequestId SendReserveEntityIdsRequest(uint32_t NumOfEntities) override;
 	virtual Worker_RequestId SendCreateEntityRequest(TArray<FWorkerComponentData>&& Components, const Worker_EntityId* EntityId) override;
 	virtual Worker_RequestId SendDeleteEntityRequest(Worker_EntityId EntityId) override;

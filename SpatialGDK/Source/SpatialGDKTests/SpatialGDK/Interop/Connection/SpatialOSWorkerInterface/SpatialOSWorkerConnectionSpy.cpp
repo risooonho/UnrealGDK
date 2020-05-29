@@ -14,9 +14,9 @@ SpatialOSWorkerConnectionSpy::SpatialOSWorkerConnectionSpy()
 	, LastEntityQuery(nullptr)
 {}
 
-TArray<Worker_OpList*> SpatialOSWorkerConnectionSpy::GetOpList()
+TArray<SpatialGDK::OpList> SpatialOSWorkerConnectionSpy::GetOpList()
 {
-	return TArray<Worker_OpList*>();
+	return TArray<SpatialGDK::OpList>();
 }
 
 Worker_RequestId SpatialOSWorkerConnectionSpy::SendReserveEntityIdsRequest(uint32_t NumOfEntities)

@@ -59,6 +59,7 @@ using SpatialGDK::FindFirstOpOfType;
 using SpatialGDK::FindFirstOpOfTypeForComponent;
 using SpatialGDK::InterestFactory;
 using SpatialGDK::RPCPayload;
+using SpatialGDK::OpList;
 
 DEFINE_LOG_CATEGORY(LogSpatialOSNetDriver);
 
@@ -1588,7 +1589,7 @@ void USpatialNetDriver::TickDispatch(float DeltaTime)
 			Connection->QueueLatestOpList();
 		}
 
-		TArray<Worker_OpList*> OpLists = Connection->GetOpList();
+		TArray<OpList> OpLists = Connection->GetOpList();
 
 		// Servers will queue ops at startup until we've extracted necessary information from the op stream
 		if (!bIsReadyToStart)
@@ -1599,11 +1600,9 @@ void USpatialNetDriver::TickDispatch(float DeltaTime)
 
 		{
 			SCOPE_CYCLE_COUNTER(STAT_SpatialProcessOps);
-			for (Worker_OpList* OpList : OpLists)
+			for (const OpList& Ops : OpLists)
 			{
-				Dispatcher->ProcessOps(OpList);
-
-				Worker_OpList_Destroy(OpList);
+				Dispatcher->ProcessOps(Ops);
 			}
 		}
 
@@ -2323,14 +2322,16 @@ void USpatialNetDriver::DelayedSendDeleteEntityRequest(Worker_EntityId EntityId,
 	}, Delay, false);
 }
 
-void USpatialNetDriver::HandleStartupOpQueueing(const TArray<Worker_OpList*>& InOpLists)
+void USpatialNetDriver::HandleStartupOpQueueing(const TArray<SpatialGDK::OpList>& InOpLists)
 {
 	if (InOpLists.Num() == 0)
 	{
 		return;
 	}
 
-	QueuedStartupOpLists.Append(InOpLists);
+	// TODO: Discuss
+	//TArray<SpatialGDK::OpList> QueuedStartupOpLists;
+	//QueuedStartupOpLists.Append(InOpLists);
 	if (IsServer())
 	{
 		bIsReadyToStart = FindAndDispatchStartupOpsServer(InOpLists);
@@ -2360,20 +2361,20 @@ void USpatialNetDriver::HandleStartupOpQueueing(const TArray<Worker_OpList*>& In
 		return;
 	}
 
-	for (Worker_OpList* OpList : QueuedStartupOpLists)
+	//for (const OpList& Ops : QueuedStartupOpLists)
+	for (const OpList& Ops : InOpLists)
 	{
-		Dispatcher->ProcessOps(OpList);
-		Worker_OpList_Destroy(OpList);
+		Dispatcher->ProcessOps(Ops);
 	}
 
 	// Sanity check that the dispatcher encountered, skipped, and removed
 	// all Ops we asked it to skip
 	check(Dispatcher->GetNumOpsToSkip() == 0);
 
-	QueuedStartupOpLists.Empty();
+	//QueuedStartupOpLists.Empty();
 }
 
-bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<Worker_OpList*>& InOpLists)
+bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<OpList>& InOpLists)
 {
 	TArray<Worker_Op*> FoundOps;
 
@@ -2500,7 +2501,7 @@ bool USpatialNetDriver::FindAndDispatchStartupOpsServer(const TArray<Worker_OpLi
 	return false;
 }
 
-bool USpatialNetDriver::FindAndDispatchStartupOpsClient(const TArray<Worker_OpList*>& InOpLists)
+bool USpatialNetDriver::FindAndDispatchStartupOpsClient(const TArray<OpList>& InOpLists)
 {
 	if (bMapLoaded)
 	{
@@ -2530,14 +2531,11 @@ void USpatialNetDriver::SelectiveProcessOps(TArray<Worker_Op*> FoundOps)
 	// the Ops around and dealing with memory that is / should be managed by the Worker SDK.
 	// The Op remains owned by the original OpList.  Finally, notify the dispatcher to skip
 	// these Ops when they are encountered later when we process the queued ops.
-	for (Worker_Op* Op : FoundOps)
+	for (Worker_Op* FoundOp : FoundOps)
 	{
-		Worker_OpList SingleOpList;
-		SingleOpList.op_count = 1;
-		SingleOpList.ops = Op;
-
-		Dispatcher->ProcessOps(&SingleOpList);
-		Dispatcher->MarkOpToSkip(Op);
+		OpList Op = { FoundOp, 1, nullptr };
+		Dispatcher->ProcessOps(Op);
+		Dispatcher->MarkOpToSkip(FoundOp);
 	}
 }
 

@@ -2,18 +2,20 @@
 
 #pragma once
 
-#include "Containers/Queue.h"
-#include "HAL/Event.h"
-#include "HAL/Runnable.h"
-#include "HAL/ThreadSafeBool.h"
 #include "Interop/Connection/OutgoingMessages.h"
 #include "Interop/Connection/SpatialOSWorkerInterface.h"
 #include "Interop/Connection/WorkerConnectionCoordinator.h"
 #include "SpatialCommonTypes.h"
+#include "SpatialView/OpList/OpList.h"
+
+#include "Containers/Queue.h"
+#include "HAL/Event.h"
+#include "HAL/Runnable.h"
+#include "HAL/ThreadSafeBool.h"
 #include "UObject/WeakObjectPtr.h"
 
-#include <WorkerSDK/improbable/c_schema.h>
-#include <WorkerSDK/improbable/c_worker.h>
+#include <improbable/c_schema.h>
+#include <improbable/c_worker.h>
 
 #include "SpatialWorkerConnection.generated.h"
 
@@ -30,7 +32,7 @@ public:
 	void DestroyConnection();
 
 	// Worker Connection Interface
-	virtual TArray<Worker_OpList*> GetOpList() override;
+	virtual TArray<SpatialGDK::OpList> GetOpList() override;
 	virtual Worker_RequestId SendReserveEntityIdsRequest(uint32_t NumOfEntities) override;
 	virtual Worker_RequestId SendCreateEntityRequest(TArray<FWorkerComponentData>&& Components, const Worker_EntityId* EntityId) override;
 	virtual Worker_RequestId SendDeleteEntityRequest(Worker_EntityId EntityId) override;
@@ -79,7 +81,7 @@ private:
 	FRunnableThread* OpsProcessingThread;
 	FThreadSafeBool KeepRunning = true;
 
-	TQueue<Worker_OpList*> OpListQueue;
+	TQueue<SpatialGDK::OpList> OpListQueue;
 	TQueue<TUniquePtr<SpatialGDK::FOutgoingMessage>> OutgoingMessagesQueue;
 
 	// RequestIds per worker connection start at 0 and incrementally go up each command sent.
