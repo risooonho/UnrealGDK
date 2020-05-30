@@ -111,8 +111,8 @@ public:
 				Components.Push(Worker_ComponentData{nullptr, Component.GetComponentId(), MoveTemp(Component).Release(),
 					nullptr});
 			}
-			Worker_EntityId* EntityId = Request.EntityId.IsSet() ? Request.EntityId.GetValue() : nullptr;
-			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? Request.TimeoutMillis.GetValue() : nullptr;
+			Worker_EntityId* EntityId = Request.EntityId.IsSet() ? &Request.EntityId.GetValue() : nullptr;
+			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? &Request.TimeoutMillis.GetValue() : nullptr;
 			const Worker_RequestId Id = Worker_Connection_SendCreateEntityRequest(Connection.Get(), Components.Num(),
 				Components.GetData(), EntityId, Timeout);
 			InternalToUserRequestId[Id] = Request.RequestId;
@@ -120,7 +120,7 @@ public:
 
 		for (auto& Request : Messages->DeleteEntityRequests)
 		{
-			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? Request.TimeoutMillis.GetValue() : nullptr;
+			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? &Request.TimeoutMillis.GetValue() : nullptr;
 			const Worker_RequestId Id = Worker_Connection_SendDeleteEntityRequest(Connection.Get(), Request.EntityId,
 				Timeout);
 			InternalToUserRequestId[Id] = Request.RequestId;
@@ -128,7 +128,7 @@ public:
 
 		for (auto& Request : Messages->EntityQueryRequests)
 		{
-			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? Request.TimeoutMillis.GetValue() : nullptr;
+			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? &Request.TimeoutMillis.GetValue() : nullptr;
 			Worker_EntityQuery Query = Request.Query.GetWorkerQuery();
 			const Worker_RequestId Id = Worker_Connection_SendEntityQueryRequest(Connection.Get(), &Query, Timeout);
 			InternalToUserRequestId[Id] = Request.RequestId;
@@ -136,7 +136,7 @@ public:
 
 		for (auto& Request : Messages->EntityCommandRequests)
 		{
-			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? Request.TimeoutMillis.GetValue() : nullptr;
+			const uint32* Timeout = Request.TimeoutMillis.IsSet() ? &Request.TimeoutMillis.GetValue() : nullptr;
 			Worker_CommandRequest r = {nullptr, Request.Request.GetComponentId(), Request.Request.GetCommandIndex(),
 				MoveTemp(Request.Request).Release(), nullptr};
 			const Worker_RequestId Id = Worker_Connection_SendCommandRequest(Connection.Get(), Request.EntityId, &r,

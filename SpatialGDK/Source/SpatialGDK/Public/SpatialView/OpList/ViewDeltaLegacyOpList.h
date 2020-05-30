@@ -54,6 +54,11 @@ inline OpList GetOpListFromViewDelta(const ViewDelta& Delta)
 		return {Ops.GetData(), static_cast<uint32>(Ops.Num()), MoveTemp(OpData)};
 	}
 
+	Worker_Op StartCriticalSection = {};
+	StartCriticalSection.op_type = WORKER_OP_TYPE_CRITICAL_SECTION;
+	StartCriticalSection.op.critical_section.in_critical_section = 1;
+	Ops.Push(StartCriticalSection);
+
 	for (const Worker_EntityId& Id : Delta.GetEntitiesAdded())
 	{
 		Worker_Op Op = {};
@@ -155,6 +160,11 @@ inline OpList GetOpListFromViewDelta(const ViewDelta& Delta)
 		Op.op.remove_entity.entity_id = Id;
 		Ops.Push(Op);
 	}
+
+	Worker_Op EndCriticalSection = {};
+	EndCriticalSection.op_type = WORKER_OP_TYPE_CRITICAL_SECTION;
+	EndCriticalSection.op.critical_section.in_critical_section = 0;
+	Ops.Push(EndCriticalSection);
 
 	// Worker messages do not have ordering constraints.
 	Ops.Append(Delta.GetWorkerMessages());
