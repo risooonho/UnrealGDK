@@ -73,6 +73,7 @@ private:
 	void AddMenuExtension(FMenuBuilder& Builder);
 
 	void VerifyAndStartDeployment();
+	void StartLocalReceptionistProxyServer();
 
 	void StartLocalSpatialDeploymentButtonClicked();
 	void StopSpatialDeploymentButtonClicked();
@@ -159,6 +160,9 @@ private:
 	// This should be called whenever the settings determining whether a local deployment should be automatically started have changed.
 	void OnAutoStartLocalDeploymentChanged();
 
+	//This should be called whenever the setting determining whether a local receptionist proxy server should be automatically started have changed. .
+	void OnAutoStartLocalReceptionistProxyServer();
+
 	TSharedPtr<FUICommandList> PluginCommands;
 	FDelegateHandle OnPropertyChangedDelegateHandle;
 	bool bStopSpatialOnExit;
@@ -182,6 +186,8 @@ private:
 	FLocalDeploymentManager* LocalDeploymentManager;
 
 	TFuture<bool> AttemptSpatialAuthResult;
+
+	FProcHandle ProxyServerProcHandle;
 
 	FCloudDeploymentConfiguration CloudDeploymentConfiguration;
 
