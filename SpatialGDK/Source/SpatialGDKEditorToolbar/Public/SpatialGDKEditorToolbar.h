@@ -13,6 +13,7 @@
 
 #include "CloudDeploymentConfiguration.h"
 #include "LocalDeploymentManager.h"
+#include "LocalReceptionistProxyServerManager.h"
 
 class FMenuBuilder;
 class FSpatialGDKEditor;
@@ -184,10 +185,9 @@ private:
 	TSharedPtr<SSpatialGDKCloudDeploymentConfiguration> CloudDeploymentConfigPtr;
 	
 	FLocalDeploymentManager* LocalDeploymentManager;
+	FLocalReceptionistProxyServerManager* LocalReceptionistProxyServerManager;
 
 	TFuture<bool> AttemptSpatialAuthResult;
-
-	FProcHandle ProxyServerProcHandle;
 
 	FCloudDeploymentConfiguration CloudDeploymentConfiguration;
 
