@@ -64,9 +64,6 @@ public:
 	bool IsBuildClientWorkerEnabled() const;
 	void OnCheckedBuildClientWorker();
 
-	bool IsStartLocalServerWorkerEnabled() const;
-	void OnCheckedStartLocalServerWorker();
-
 private:
 	void MapActions(TSharedPtr<FUICommandList> PluginCommands);
 	void SetupToolbar(TSharedPtr<FUICommandList> PluginCommands);
@@ -161,7 +158,7 @@ private:
 	// This should be called whenever the settings determining whether a local deployment should be automatically started have changed.
 	void OnAutoStartLocalDeploymentChanged();
 
-	//This should be called whenever the setting determining whether a local receptionist proxy server should be automatically started have changed. .
+	//This should be called whenever the setting determining whether a local receptionist proxy server should be automatically started has changed.
 	void OnAutoStartLocalReceptionistProxyServer();
 
 	TSharedPtr<FUICommandList> PluginCommands;

@@ -247,12 +247,6 @@ void FSpatialGDKEditorToolbarModule::MapActions(TSharedPtr<class FUICommandList>
 		FIsActionChecked::CreateRaw(this, &FSpatialGDKEditorToolbarModule::IsSimulatedPlayersEnabled));
 
 	InPluginCommands->MapAction(
-		FSpatialGDKEditorToolbarCommands::Get().EnableStartLocalServerWorker,
-		FExecuteAction::CreateRaw(this, &FSpatialGDKEditorToolbarModule::OnCheckedStartLocalServerWorker),
-		FCanExecuteAction::CreateRaw(this, &FSpatialGDKEditorToolbarModule::AreCloudDeploymentPropertiesEditable),
-		FIsActionChecked::CreateRaw(this, &FSpatialGDKEditorToolbarModule::IsStartLocalServerWorkerEnabled));
-
-	InPluginCommands->MapAction(
 		FSpatialGDKEditorToolbarCommands::Get().OpenCloudDeploymentWindowAction,
 		FExecuteAction::CreateRaw(this, &FSpatialGDKEditorToolbarModule::ShowCloudDeploymentDialog),
 		FCanExecuteAction());
@@ -456,7 +450,6 @@ void OnCloudDeploymentNameChanged(const FText& InText, ETextCommit::Type InCommi
 	SpatialGDKEditorSettings->SetDevelopmentDeploymentToConnect(InputDeploymentName);
 
 	UE_LOG(LogSpatialGDKEditorToolbar, Display, TEXT("Setting cloud deployment name to %s"), *InputDeploymentName);
-
 }
 
 TSharedRef<SWidget> FSpatialGDKEditorToolbarModule::CreateStartDropDownMenuContent()
@@ -500,7 +493,6 @@ TSharedRef<SWidget> FSpatialGDKEditorToolbarModule::CreateStartDropDownMenuConte
 		);
 		MenuBuilder.AddMenuEntry(FSpatialGDKEditorToolbarCommands::Get().EnableBuildClientWorker);
 		MenuBuilder.AddMenuEntry(FSpatialGDKEditorToolbarCommands::Get().EnableBuildSimulatedPlayer);
-		MenuBuilder.AddMenuEntry(FSpatialGDKEditorToolbarCommands::Get().EnableStartLocalServerWorker);
 	}
 	MenuBuilder.EndSection();
 
@@ -1220,7 +1212,6 @@ void FSpatialGDKEditorToolbarModule::OnAutoStartLocalDeploymentChanged()
 
 	if (bShouldAutoStartLocalDeployment)
 	{
-
 		if (!UEditorEngine::TryStartSpatialDeployment.IsBound())
 		{
 			// Bind the TryStartSpatialDeployment delegate if autostart is enabled.
@@ -1262,11 +1253,7 @@ void FSpatialGDKEditorToolbarModule::GenerateConfigFromCurrentMap()
 void FSpatialGDKEditorToolbarModule::OnAutoStartLocalReceptionistProxyServer()
 {
 	const USpatialGDKEditorSettings* Settings = GetDefault<USpatialGDKEditorSettings>();
-
 	bool bShouldAutoStartLocalReceptionistProxyServer = (Settings->bStartLocalServerWorker && Settings->SpatialOSNetFlowType == ESpatialOSNetFlow::CloudDeployment);
-
-	// TODO: UNR-1776 Workaround for SpatialNetDriver requiring editor settings.
-	//LocalDeploymentManager->SetAutoDeploy(bShouldAutoStartLocalDeployment);
 
 	if (bShouldAutoStartLocalReceptionistProxyServer)
 	{
@@ -1281,13 +1268,13 @@ void FSpatialGDKEditorToolbarModule::OnAutoStartLocalReceptionistProxyServer()
 	}
 	else
 	{
-	if (UEditorEngine::TryStartLocalReceptionistProxyServer.IsBound())
-	{
-		// Unbind the TryStartLocalReceptionistProxyServer if autostart is disabled.
-		UEditorEngine::TryStartLocalReceptionistProxyServer.Unbind();
+		if (UEditorEngine::TryStartLocalReceptionistProxyServer.IsBound())
+		{
+			// Unbind the TryStartLocalReceptionistProxyServer if autostart is disabled.
+			UEditorEngine::TryStartLocalReceptionistProxyServer.Unbind();
 
-		LocalReceptionistProxyServerManager->TryStopReceptionistProxyServer();
-	}
+			LocalReceptionistProxyServerManager->TryStopReceptionistProxyServer();
+		}
 	}
 }
 
@@ -1421,18 +1408,6 @@ bool FSpatialGDKEditorToolbarModule::IsSimulatedPlayersEnabled() const
 void FSpatialGDKEditorToolbarModule::OnCheckedSimulatedPlayers()
 {
 	GetMutableDefault<USpatialGDKEditorSettings>()->SetSimulatedPlayersEnabledState(!IsSimulatedPlayersEnabled());
-}
-
-bool FSpatialGDKEditorToolbarModule::IsStartLocalServerWorkerEnabled() const
-{
-	return GetDefault<USpatialGDKEditorSettings>()->IsStartLocalServerWorkerEnabled();
-}
-
-void FSpatialGDKEditorToolbarModule::OnCheckedStartLocalServerWorker()
-{
-	GetMutableDefault<USpatialGDKEditorSettings>()->SetStartLocalServerWorker(!IsStartLocalServerWorkerEnabled());
-
-	OnAutoStartLocalReceptionistProxyServer();
 }
 
 bool FSpatialGDKEditorToolbarModule::IsBuildClientWorkerEnabled() const
