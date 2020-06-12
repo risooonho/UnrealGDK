@@ -70,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a new dropdown setting in SpatialGDK Editor Settings to choose Runtime variant. There is currently Standard and Compatibility Mode. Standard is default, Compatibility Mode can be used if any networking issues arise when updating to the latest GDK version.
 - Added new default deployment templates. The default template changes based on which Runtime variant you have selected and your current primary deployment region is.
 - Inspector V2 is now supported. Inspector V2 is used by default for the Standard Runtime variant. Inspector V1 remains the default for the Compatibility Mode Runtime variant.
+-Added the `Connect local server worker to the cloud deployment` checkbox in **SpatialOS Editor Settings**, that enables/disables the option to start and connect a local server to the cloud deployment when `Connect to cloud deployment` is enabled.
 
 ## Bug fixes:
 - Fix problem where load balanced cloud deploys could fail to start while under heavy load.
