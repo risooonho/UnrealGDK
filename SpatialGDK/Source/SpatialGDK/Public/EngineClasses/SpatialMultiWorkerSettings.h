@@ -12,23 +12,25 @@
 class UAbstractLBStrategy;
 class UAbstractLockingPolicy;
 
-USTRUCT()
-struct SPATIALGDK_API FSpatialMultiWorkerSettings
+UCLASS(Blueprintable)
+class SPATIALGDK_API USpatialMultiWorkerSettings : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	USpatialMultiWorkerSettings() {};
+
 	/** Enable running different server worker types to split the simulation. */
-	UPROPERTY(EditAnywhere, Config, Category = "Multi-Worker")
+	UPROPERTY(EditAnywhere, Category = "Multi-Worker")
 	bool bEnableMultiWorker;
 
-	UPROPERTY(EditAnywhere, Config, Category = "Multi-Worker", meta = (EditCondition = "bEnableMultiWorker"))
+	UPROPERTY(EditAnywhere, Category = "Multi-Worker")
 	TSubclassOf<UAbstractLBStrategy> DefaultLayerLoadBalanceStrategy;
 
-	UPROPERTY(EditAnywhere, Config, Category = "Multi-Worker", meta = (EditCondition = "bEnableMultiWorker"))
+	UPROPERTY(EditAnywhere, Category = "Multi-Worker")
 	TSubclassOf<UAbstractLockingPolicy> DefaultLayerLockingPolicy;
 
 	/** Layer configuration. */
-	UPROPERTY(EditAnywhere, Config, Category = "Multi-Worker", meta = (EditCondition = "bEnableMultiWorker"))
+	UPROPERTY(EditAnywhere, Category = "Multi-Worker")
 	TMap<FName, FLayerInfo> WorkerLayers;
 };
