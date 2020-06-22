@@ -435,7 +435,7 @@ void USpatialNetDriver::CreateAndInitializeLoadBalancingClasses()
 	{
 		LoadBalanceEnforcer = MakeUnique<SpatialLoadBalanceEnforcer>(Connection->GetWorkerId(), StaticComponentView, VirtualWorkerTranslator.Get());
 
-		if (WorldSettings == nullptr  || MultiWorkerSettings == nullptr || !MultiWorkerSettings->bEnableMultiWorker)
+		if (WorldSettings == nullptr || MultiWorkerSettings == nullptr || !MultiWorkerSettings->bEnableMultiWorker)
 		{
 			LockingPolicy = NewObject<UOwnershipLockingPolicy>(this);
 		}
