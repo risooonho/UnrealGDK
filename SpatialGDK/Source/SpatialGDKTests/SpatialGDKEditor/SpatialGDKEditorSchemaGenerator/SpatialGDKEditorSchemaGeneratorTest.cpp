@@ -54,13 +54,13 @@ ComponentNamesAndIds ParseAvailableNamesAndIdsFromSchemaFile(const TArray<FStrin
 
 	for (const auto& SchemaLine : LoadedSchema)
 	{
-		FRegexPattern IdPattern = TEXT("(\tid = )([0-9]+)(;)");
+		FRegexPattern IdPattern(TEXT("(\tid = )([0-9]+)(;)"));
 		FRegexMatcher IdRegMatcher(IdPattern, SchemaLine);
 
-		FRegexPattern NamePattern = TEXT("(^component )(.+)( \\{)");
+		FRegexPattern NamePattern(TEXT("(^component )(.+)( \\{)"));
 		FRegexMatcher NameRegMatcher(NamePattern, SchemaLine);
 
-		FRegexPattern SubobjectNamePattern = TEXT("(\tUnrealObjectRef )(.+)( = )([0-9]+)(;)");
+		FRegexPattern SubobjectNamePattern(TEXT("(\tUnrealObjectRef )(.+)( = )([0-9]+)(;)"));
 		FRegexMatcher SubobjectNameRegMatcher(SubobjectNamePattern, SchemaLine);
 
 		if (IdRegMatcher.FindNext())

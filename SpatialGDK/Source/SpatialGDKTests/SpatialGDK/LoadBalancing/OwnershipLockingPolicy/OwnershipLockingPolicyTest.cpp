@@ -158,9 +158,9 @@ bool FAcquireLock::Update()
 		for (const TPair<AActor*, TArray<LockingTokenAndDebugString>>& ActorLockingTokenAndDebugStrings : Data->TestActorToLockingTokenAndDebugStrings)
 		{
 			const TArray<LockingTokenAndDebugString>& LockingTokensAndDebugStrings = ActorLockingTokenAndDebugStrings.Value;
-			bool TokenAlreadyExists = LockingTokensAndDebugStrings.ContainsByPredicate([Token](const LockingTokenAndDebugString& Data)
+			bool TokenAlreadyExists = LockingTokensAndDebugStrings.ContainsByPredicate([Token](const LockingTokenAndDebugString& Data2)
 			{
-				return Token == Data.Key;
+				return Token == Data2.Key;
 			});
 			if (TokenAlreadyExists)
 			{
@@ -196,9 +196,9 @@ bool FReleaseLock::Update()
 		return true;
 	}
 
-	int32 TokenIndex = LockTokenAndDebugStrings->IndexOfByPredicate([this](const LockingTokenAndDebugString& Data)
+	int32 TokenIndex = LockTokenAndDebugStrings->IndexOfByPredicate([this](const LockingTokenAndDebugString& Data2)
 	{
-		return Data.Value == LockDebugString;
+		return Data2.Value == LockDebugString;
 	});
 	Test->TestTrue("Found valid lock token", TokenIndex != INDEX_NONE);
 
