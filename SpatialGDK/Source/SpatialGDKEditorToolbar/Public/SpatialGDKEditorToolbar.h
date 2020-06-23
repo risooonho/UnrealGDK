@@ -71,7 +71,6 @@ private:
 	void AddMenuExtension(FMenuBuilder& Builder);
 
 	void VerifyAndStartDeployment();
-	void StartLocalReceptionistProxyServer();
 
 	void StartLocalSpatialDeploymentButtonClicked();
 	void StopSpatialDeploymentButtonClicked();
